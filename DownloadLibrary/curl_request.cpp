@@ -6,11 +6,13 @@
 #include <stdexcept>
 
 
-DownloadLibrary::CurlRequest::CurlRequest(std::string url, RangeType range, std::string save_loc , bool header_only, std::string user_agent):
+DownloadLibrary::CurlRequest::CurlRequest(std::string url, RangeType range, std::string save_loc , bool header_only, std::string user_agent,bool follow_redirects):
 url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),progress_data{0,0}{
         curl_easy_setopt(this->curl, CURLOPT_XFERINFODATA, reinterpret_cast<void *>(&this->progress_data));
         curl_easy_setopt(this->curl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(this->curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
+        if(follow_redirects)
+            curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
         if(user_agent != " "){
             this->user_agent = user_agent;
             curl_easy_setopt(this->curl, CURLOPT_USERAGENT, user_agent.c_str());
