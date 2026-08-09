@@ -11,11 +11,13 @@
 #include <string>
 #include <iostream>
 #include <curl/curl.h>
+#include <vector>
 namespace DownloadLibrary {
     struct progress_data{
-        std::atomic<int> total_download;
+        std::atomic<long> total_download;
         std::atomic<int> stop_switch;
     };
+
     using RangeType = std::pair<std::string, std::string> ;
     class CurlRequest: std::enable_shared_from_this<CurlRequest>{
         private:
@@ -42,6 +44,29 @@ namespace DownloadLibrary {
             void stop();
             ~CurlRequest();
     };
+    struct part_data{
+        std::shared_ptr<CurlRequest> req;
+        long downloaded_bytes;
+        std::string range;
+    };
+    struct file_properties{
+        std::string file_extension;
+        std::string file_name;
+    };
+    class DownloadTask{
+        private:
+            int part_count;
+            long total_bytes;
+            long total_downloaded_bytes;
+            std::string task_location;
+            std::vector<part_data> parts;
+            std::string url;
+            std::string user_agent;
+        public:
+            DownloadTask(std::string task_location);
+            DownloadTask(std::string url,std::string task_location, int part_count, struct file_properties={}, std::string user_agent="");
+    };
+
 }
 
 
