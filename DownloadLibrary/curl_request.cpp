@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 
-DownloadLibrary::CurlRequest::CurlRequest(std::string url, RangeType range, std::string save_loc , bool header_only, std::string user_agent,bool follow_redirects):
+DownloadLibrary::CurlRequest::CurlRequest(std::string url, std::string save_loc , bool header_only, RangeType range,  std::string user_agent,bool follow_redirects):
 url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),progress_data{0,0}{
         curl_easy_setopt(this->curl, CURLOPT_XFERINFODATA, reinterpret_cast<void *>(&this->progress_data));
         curl_easy_setopt(this->curl, CURLOPT_NOPROGRESS, 0L);
@@ -22,11 +22,8 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
             throw std::runtime_error("The file cannot be opened or does not exists");
         curl_easy_setopt(this->curl, CURLOPT_FILE, this->file);
         if(range.first != "ignore"){
-            std::stringstream rngstream;
-            rngstream<<range.first<<"-"<<range.second<<'\0';
-            rngstream.flush();
-            this->range = rngstream.str();
-            curl_easy_setopt(this->curl,  CURLOPT_RANGE, this->range.c_str());
+
+            curl_easy_setopt(this->curl,  CURLOPT_RANGE, range.get_range().c_str());
         }
         curl_easy_setopt(this->curl, CURLOPT_URL, this->url.c_str());
 
