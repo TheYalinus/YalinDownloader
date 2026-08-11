@@ -2,6 +2,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/system.h>
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
 
@@ -12,14 +13,18 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
         curl_easy_setopt(this->curl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(this->curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
         if(follow_redirects)
+            std::cout<<"Follow redirects"<<std::endl;
             curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
         if(user_agent != " "){
             this->user_agent = user_agent;
             curl_easy_setopt(this->curl, CURLOPT_USERAGENT, user_agent.c_str());
         }
         this->file = fopen(this->save_loc.c_str(), "w+");
-        if(this->file == nullptr)
-            throw std::runtime_error("The file cannot be opened or does not exists");
+        if(this->file == nullptr){
+            std::cout<<"The file cannot be opened or does not exists"<<std::endl;
+            std::ofstream x (this->save_loc);
+            this->file = fopen(this->save_loc.c_str(), "w+");
+        }
         curl_easy_setopt(this->curl, CURLOPT_FILE, this->file);
         if(range.first != "ignore"){
 

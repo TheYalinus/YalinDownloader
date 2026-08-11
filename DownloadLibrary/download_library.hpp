@@ -40,7 +40,7 @@ namespace DownloadLibrary {
 
 
         public:
-            CurlRequest(std::string url,std::string save_loc,bool header_only,RangeType range = {"",""},  std::string user_agent =" ", bool follow_redirects=false);
+            CurlRequest(std::string url,std::string save_loc,bool header_only,RangeType range = {"",""},  std::string user_agent =" ", bool follow_redirects=true);
             CURLcode curlPerform();
             void setUserAgent(std::string agent);
             static int progress_callback(void *clientp,
@@ -72,11 +72,15 @@ namespace DownloadLibrary {
             std::string user_agent;
             json cfg_data;
             struct file_properties final_props;
+            bool follow_redirects;
+            std::string cnttype;
         public:
             DownloadTask(std::string task_location,std::string user_agent="");
-            DownloadTask(std::string url,std::string task_location, int part_count, std::string user_agent="", struct file_properties={"",""});
-            file_properties get_inf();
+            DownloadTask(std::string url,std::string task_location, int part_count, std::string user_agent="", bool follow_redirects = true, struct file_properties={"",""});
+            struct file_properties get_inf();
             void create_json_config(json & n);
+            void create_json_config();
+            std::string gen_part_name(int i);
     };
 
 }

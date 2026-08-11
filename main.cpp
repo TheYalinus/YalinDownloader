@@ -18,7 +18,7 @@ int main(){
         }
     }
     b.join();*/
-    DownloadLibrary::DownloadTask a("https://files.nexus-cdn.com/1704/2347/-Skyrim%20202X%2010.5.2%20-%20Architecture%20PART%201-2347-10-5-2-1753882692.rar?md5=3JymfeUnf98lO7ANj6B0LA&expires=1786206533&user_id=205216541","/home/cAg/test",4,user_agent);
+    DownloadLibrary::DownloadTask a("https://files.nexus-cdn.com/1704/2347/-Skyrim%20202X%2010.5.2%20-%20Architecture%20PART%201-2347-10-5-2-1753882692.rar?md5=Q3cK1v85D_elrRpLdeyfDg&expires=1786317257&user_id=205216541","/home/cAg/test",4,user_agent);
 
     return 0;
 }
