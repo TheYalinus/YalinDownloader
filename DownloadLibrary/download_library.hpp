@@ -1,8 +1,11 @@
 #ifndef DOWNLOAD_LIBRARY_HPP
 #define DOWNLOAD_LIBRARY_HPP
 #include <atomic>
+#include <cstddef>
 #include <curl/curl.h>
 #include <filesystem>
+#include <fstream>
+#include <future>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -24,6 +27,7 @@ namespace DownloadLibrary {
     class RangeType: public std::pair<std::string, std::string>{
         public:
             RangeType(std::string a, std::string b);
+            RangeType(std::string a);
             std::string get_range();
     };
     using json =nlohmann::json;
@@ -37,6 +41,7 @@ namespace DownloadLibrary {
             CURL* curl;
             std::string user_agent;
             struct progress_data progress_data;
+            std::fstream stream;
 
 
         public:
@@ -48,17 +53,24 @@ namespace DownloadLibrary {
                                   curl_off_t  dlnow,
                                   curl_off_t  ultotal,
                                   curl_off_t  ulnow);
+            static size_t write_function(char * data , size_t size , size_t nmemb, void * clientp);
             int downloaded();
             void stop();
             ~CurlRequest();
     };
     struct part_data{
         std::shared_ptr<CurlRequest> req;
+        int part_id ;
         long downloaded_bytes;
     };
     struct file_properties{ //For final output file
         std::string file_extension;
         std::string file_name;
+    };
+    struct inf_data{
+        file_properties props;
+        std::string cnttype;
+        long totalbytes;
     };
     class DownloadTask{
         private:
@@ -77,10 +89,13 @@ namespace DownloadLibrary {
         public:
             DownloadTask(std::string task_location,std::string user_agent="");
             DownloadTask(std::string url,std::string task_location, int part_count, std::string user_agent="", bool follow_redirects = true, struct file_properties={"",""});
-            struct file_properties get_inf();
+            struct inf_data get_inf();
             void create_json_config(json & n);
             void create_json_config();
             std::string gen_part_name(int i);
+            std::vector<part_data> get_parts();
+            void assemble();
+            static std::string gen_random_file();
     };
 
 }

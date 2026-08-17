@@ -13,6 +13,10 @@ std::string DownloadLibrary::RangeType::get_range(){
 }
 DownloadLibrary::RangeType::RangeType(std::string a, std::string b):
 std::pair<std::string,std::string>(a,b){
-    std::cout<<"Debug from rangetype 0:"<< a <<","<<b<<std::endl;
-    std::cout<<"Debug from rangetype 1:" <<this->first <<","<<this->second<<std::endl;
+
+}
+DownloadLibrary::RangeType::RangeType(std::string a):
+std::pair<std::string , std::string>(a.substr(0,a.find("-")-1),a.substr(a.find("-")+1))
+{
+
 }

@@ -18,7 +18,15 @@ int main(){
         }
     }
     b.join();*/
-    DownloadLibrary::DownloadTask a("https://files.nexus-cdn.com/1704/2347/-Skyrim%20202X%2010.5.2%20-%20Architecture%20PART%201-2347-10-5-2-1753882692.rar?md5=Q3cK1v85D_elrRpLdeyfDg&expires=1786317257&user_id=205216541","/home/cAg/test",4,user_agent);
+    DownloadLibrary::DownloadTask a("https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Onur_An%C4%B1t%C4%B1.JPG/250px-Onur_An%C4%B1t%C4%B1.JPG?utm_source=tr.wikipedia.org&utm_campaign=parser&utm_content=thumbnail","/home/cAg/test/",4,user_agent);
+    /*DownloadLibrary::DownloadTask b("/home/cAg/test/",user_agent);*/
+    auto parts = a.get_parts();
+    for (auto n : parts){
+        n.req->curlPerform();
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+
+    a.assemble();
 
     return 0;
 }

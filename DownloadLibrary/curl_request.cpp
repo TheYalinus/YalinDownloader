@@ -1,17 +1,22 @@
 #include "download_library.hpp"
+#include <chrono>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/system.h>
+#include <filesystem>
 #include <fstream>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
+#include <thread>
 
 
 DownloadLibrary::CurlRequest::CurlRequest(std::string url, std::string save_loc , bool header_only, RangeType range,  std::string user_agent,bool follow_redirects):
-url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),progress_data{0,0}{
+url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),progress_data{0,0},stream(std::fstream()){
         curl_easy_setopt(this->curl, CURLOPT_XFERINFODATA, reinterpret_cast<void *>(&this->progress_data));
         curl_easy_setopt(this->curl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(this->curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
+        curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, write_function);
         if(follow_redirects)
             std::cout<<"Follow redirects"<<std::endl;
             curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -19,13 +24,16 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
             this->user_agent = user_agent;
             curl_easy_setopt(this->curl, CURLOPT_USERAGENT, user_agent.c_str());
         }
-        this->file = fopen(this->save_loc.c_str(), "w+");
+        if(!std::filesystem::exists(this->save_loc))
+        {std::ofstream a(this->save_loc); a.close();}
+        this->stream.open(this->save_loc);
+        /*this->file = fopen(this->save_loc.c_str(), "a+");
         if(this->file == nullptr){
             std::cout<<"The file cannot be opened or does not exists"<<std::endl;
             std::ofstream x (this->save_loc);
             this->file = fopen(this->save_loc.c_str(), "w+");
-        }
-        curl_easy_setopt(this->curl, CURLOPT_FILE, this->file);
+            }*/
+        curl_easy_setopt(this->curl, CURLOPT_FILE, &this->stream);
         if(range.first != "ignore"){
 
             curl_easy_setopt(this->curl,  CURLOPT_RANGE, range.get_range().c_str());
@@ -34,15 +42,29 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
 
 }
 CURLcode DownloadLibrary::CurlRequest::curlPerform(){
-    return curl_easy_perform(this->curl);
+    auto cc =curl_easy_perform(this->curl);
+    long http_code=0;
+    curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+    if(http_code == 429){
+
+        std::filesystem::remove(this->save_loc);
+        {std::ofstream a(this->save_loc);
+            a.close();}
+        this->stream.close();
+        this->stream.clear();
+        this->stream.open(this->save_loc, std::ios::binary | std::ios::trunc);
+        curl_easy_setopt(this->curl, CURLOPT_FILE, &this->stream);
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        cc = curl_easy_perform(this->curl);
+    }
+    return cc;
 }
 void DownloadLibrary::CurlRequest::setUserAgent(std::string agent){
     this->user_agent =agent;
     curl_easy_setopt(curl, CURLOPT_USERAGENT, agent.c_str());
 }
 DownloadLibrary::CurlRequest::~CurlRequest(){
-    if(this->file != nullptr)
-        fclose(file);
     if(this->curl != nullptr) {
             curl_easy_cleanup(curl);
         }
@@ -61,4 +83,11 @@ int DownloadLibrary::CurlRequest::downloaded(){
 }
 void DownloadLibrary::CurlRequest::stop(){
     this->progress_data.stop_switch=1;
+}
+size_t DownloadLibrary::CurlRequest::write_function(char * data , size_t size , size_t nmemb, void * clientp){
+    std::fstream *fs = reinterpret_cast<std::fstream*>(clientp);
+    std::cout<<size<<std::endl;
+    fs->write(data, size*nmemb);
+    fs->flush();
+    return nmemb;
 }
