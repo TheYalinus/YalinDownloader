@@ -1,8 +1,10 @@
 #include "download_library.hpp"
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <ctime>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <exception>
@@ -32,7 +34,7 @@ void DownloadLibrary::DownloadTask::create_json_config(){
     this->cfg_data["url"]=this->url;
     this->cfg_data["total_size"]=this->total_bytes;
 }
-DownloadLibrary::DownloadTask::DownloadTask(std::string task_location,std::string user_agent):user_agent(user_agent){
+DownloadLibrary::DownloadTask::DownloadTask(std::string task_location,std::string user_agent, std::string dns):user_agent(user_agent){
     if(!std::filesystem::exists(task_location))
         throw std::runtime_error("Directory does not exists");
     else if (!std::filesystem::is_directory(task_location))
@@ -62,7 +64,7 @@ DownloadLibrary::DownloadTask::DownloadTask(std::string task_location,std::strin
         std::cout<<buff.first<<buff.second <<std::endl;
         /*buff.first= std::to_string(stol(buff.first) + filesize);*/
         this->parts.push_back({
-            std::make_shared<DownloadLibrary::CurlRequest>(this->url, n["name"],false,buff),
+            std::make_shared<DownloadLibrary::CurlRequest>(this->url, n["name"],false,buff,this->user_agent,dns),
             id,
             static_cast<long>(filesize)
         });
@@ -70,7 +72,7 @@ DownloadLibrary::DownloadTask::DownloadTask(std::string task_location,std::strin
 
 
 }
-DownloadLibrary::DownloadTask::DownloadTask(std::string url,std::string task_location, int part_count, std::string user_agent, bool follow_redirects ,struct file_properties final_props):
+DownloadLibrary::DownloadTask::DownloadTask(std::string url,std::string task_location, int part_count, std::string user_agent, std::string dns,  bool follow_redirects ,struct file_properties final_props):
 url(url),part_count(part_count),final_props(final_props), user_agent(user_agent),parts(part_count),follow_redirects(follow_redirects){
     if(!std::filesystem::exists(task_location))
         throw std::runtime_error("Task directory does not exists");
@@ -111,7 +113,7 @@ url(url),part_count(part_count),final_props(final_props), user_agent(user_agent)
             this->cfg_data["parts"][std::to_string(i)]["size"]=def_part_size+remainder;
         }
         parts[i]={
-            std::make_shared<DownloadLibrary::CurlRequest>(this->url,task_dir / gen_part_name(i),false,buff,this->user_agent),
+            std::make_shared<DownloadLibrary::CurlRequest>(this->url,task_dir / gen_part_name(i),false,buff,this->user_agent,dns),
             i,
             0
         };
@@ -141,10 +143,12 @@ struct DownloadLibrary::inf_data DownloadLibrary::DownloadTask::get_inf(){
     curl_easy_header(curl, "Content-Type", 0, CURLH_HEADER, -1, &type);
     curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url_buff_c);
     content_type_buff = type->value;
+
     if(effective_url_buff_c == NULL){
         std::cerr<<"Libcurl has not given the effective url, so name will be random";
         extension="";
         //random name gen
+        full_file_name  = gen_random_file_name();
     }
     else{
         std::string effective_url_buff(effective_url_buff_c);
@@ -177,4 +181,9 @@ void DownloadLibrary::DownloadTask::assemble(){
     }
 
 
+}
+
+std::string DownloadLibrary::DownloadTask::gen_random_file_name(){
+    //some random name generator will be implemented
+    return "Downloaded_file";
 }

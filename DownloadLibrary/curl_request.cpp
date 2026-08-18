@@ -11,7 +11,7 @@
 #include <thread>
 
 
-DownloadLibrary::CurlRequest::CurlRequest(std::string url, std::string save_loc , bool header_only, RangeType range,  std::string user_agent,bool follow_redirects):
+DownloadLibrary::CurlRequest::CurlRequest(std::string url, std::string save_loc , bool header_only, RangeType range,  std::string user_agent, std::string dns , bool follow_redirects):
 url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),progress_data{0,0},stream(std::fstream()){
         curl_easy_setopt(this->curl, CURLOPT_XFERINFODATA, reinterpret_cast<void *>(&this->progress_data));
         curl_easy_setopt(this->curl, CURLOPT_NOPROGRESS, 0L);
@@ -38,6 +38,9 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
 
             curl_easy_setopt(this->curl,  CURLOPT_RANGE, range.get_range().c_str());
         }
+        if (!dns.empty())
+            curl_easy_setopt(this->curl, CURLOPT_DNS_SERVERS, dns.c_str());
+
         curl_easy_setopt(this->curl, CURLOPT_URL, this->url.c_str());
 
 }
@@ -46,17 +49,20 @@ CURLcode DownloadLibrary::CurlRequest::curlPerform(){
     long http_code=0;
     curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-    if(http_code == 429){
-
-        std::filesystem::remove(this->save_loc);
-        {std::ofstream a(this->save_loc);
-            a.close();}
+    while(http_code == 429){
+        std::cout<<"429"<<std::endl;
+        struct curl_header *retry_after;
+        std::filesystem::remove(std::filesystem::path(this->save_loc));
         this->stream.close();
         this->stream.clear();
-        this->stream.open(this->save_loc, std::ios::binary | std::ios::trunc);
+        std::ofstream a(this->save_loc);
+        curl_easy_header(curl, "Retry-After", 0, CURLH_HEADER, -1, &retry_after);
+        a.close();
+        this->stream.open(this->save_loc);
         curl_easy_setopt(this->curl, CURLOPT_FILE, &this->stream);
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::seconds(std::stol(retry_after->value)));
         cc = curl_easy_perform(this->curl);
+        curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &http_code);
     }
     return cc;
 }
@@ -86,7 +92,6 @@ void DownloadLibrary::CurlRequest::stop(){
 }
 size_t DownloadLibrary::CurlRequest::write_function(char * data , size_t size , size_t nmemb, void * clientp){
     std::fstream *fs = reinterpret_cast<std::fstream*>(clientp);
-    std::cout<<size<<std::endl;
     fs->write(data, size*nmemb);
     fs->flush();
     return nmemb;

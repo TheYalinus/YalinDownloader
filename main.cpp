@@ -2,10 +2,11 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <vector>
 #include "DownloadLibrary/download_library.hpp"
 
 int main(){
-    std::string user_agent= "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.10 Safari/605.1.1";
+    std::string user_agent= "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Trailer/93.3.8652.5";
 
     /*std::shared_ptr<DownloadLibrary::CurlRequest> a (new DownloadLibrary::CurlRequest("https://files.nexus-cdn.com/1704/2347/-Skyrim%20202X%2010.5.2%20-%20Architecture%20PART%201-2347-10-5-2-1753882692.rar?md5=ceDu4SbopD77kM0W_XcvQw&expires=1786188275&user_id=205216541","./test.html",false,user_agent));
     std::thread b([&a](){a->curlPerform();});
@@ -18,15 +19,21 @@ int main(){
         }
     }
     b.join();*/
-    DownloadLibrary::DownloadTask a("https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Onur_An%C4%B1t%C4%B1.JPG/250px-Onur_An%C4%B1t%C4%B1.JPG?utm_source=tr.wikipedia.org&utm_campaign=parser&utm_content=thumbnail","/home/cAg/test/",4,user_agent);
+    DownloadLibrary::DownloadTask a("https://upload.wikimedia.org/wikipedia/commons/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg","/home/cAg/test/",4,user_agent);
     /*DownloadLibrary::DownloadTask b("/home/cAg/test/",user_agent);*/
+    std::vector<std::thread> threads;
     auto parts = a.get_parts();
     for (auto n : parts){
-        n.req->curlPerform();
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        threads.push_back(std::thread([&n](){n.req->curlPerform();}));
+        std::this_thread::sleep_for(std::chrono::milliseconds(15));
     }
-
+    for(auto &n: threads){
+        n.join();
+        }
+    /*for(auto n : parts)
+    {
+        n.req->curlPerform();
+        }*/
     a.assemble();
-
     return 0;
 }
