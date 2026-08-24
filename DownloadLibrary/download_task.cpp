@@ -17,24 +17,27 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+DownloadLibrary::DownloadTask::DownloadTask(std::string task_location, std::string user_agent, std::string dns, DownloadLibrary::file_properties final_props):task_dir(task_location),user_agent(user_agent),dns(dns){
+
+}
 std::string DownloadLibrary::DownloadTask::gen_part_name(int i){
 
     return this->final_props.file_name+ "_" + "[" + std::to_string(i) + "]";
 }
-void DownloadLibrary::DownloadTask::create_json_config(json &n){
+void DownloadLibrary::DownloadTaskMultiple::create_json_config(json &n){
     n["version"]=1.0;
     n["parts"]=json::object();
     n["url"]=this->url;
     n["total_size"]=this->total_bytes;
 
 }
-void DownloadLibrary::DownloadTask::create_json_config(){
+void DownloadLibrary::DownloadTaskMultiple::create_json_config(){
     this->cfg_data["version"]=1.0;
     this->cfg_data["parts"]=json::object();
     this->cfg_data["url"]=this->url;
     this->cfg_data["total_size"]=this->total_bytes;
 }
-DownloadLibrary::DownloadTask::DownloadTask(std::string task_location,std::string user_agent, std::string dns):user_agent(user_agent){
+DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(std::string task_location,std::string user_agent, std::string dns):user_agent(user_agent),DownloadLibrary::DownloadTask(task_location, user_agent,dns){
     if(!std::filesystem::exists(task_location))
         throw std::runtime_error("Directory does not exists");
     else if (!std::filesystem::is_directory(task_location))
@@ -72,8 +75,8 @@ DownloadLibrary::DownloadTask::DownloadTask(std::string task_location,std::strin
 
 
 }
-DownloadLibrary::DownloadTask::DownloadTask(std::string url,std::string task_location, int part_count, std::string user_agent, std::string dns,  bool follow_redirects ,struct file_properties final_props):
-url(url),part_count(part_count),final_props(final_props), user_agent(user_agent),parts(part_count),follow_redirects(follow_redirects){
+DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(DownloadLibrary::HEADER_FLAG header ,DownloadLibrary::factory_data fdata , std::string url,std::string task_location, int part_count, std::string user_agent, std::string dns,  bool follow_redirects ,struct file_properties final_props): DownloadLibrary::DownloadTask(task_location,user_agent,dns,final_props),
+url(url),part_count(part_count), user_agent(user_agent),parts(part_count),follow_redirects(follow_redirects),header(header){
     if(!std::filesystem::exists(task_location))
         throw std::runtime_error("Task directory does not exists");
     else if (!std::filesystem::is_directory(task_location))
@@ -81,13 +84,12 @@ url(url),part_count(part_count),final_props(final_props), user_agent(user_agent)
     else if(!std::filesystem::is_empty(task_location))
         throw std::runtime_error("Task directory should be empty.");
 
-    struct inf_data id= get_inf();
     if(final_props.file_name.empty())
     {
-        this->final_props= id.props;
+        this->final_props= fdata.props;
     }
-    this->total_bytes = id.totalbytes;
-    this->cnttype = id.cnttype;
+    this->total_bytes = fdata.total_size;
+    this->cnttype = fdata.cnt_type;
     this->cfg_data["cnt-type"]= this ->cnttype;
     this->cfg_data["file-props"]["filename"]= this->final_props.file_name;
     this->cfg_data["file-props"]["fileextension"]= this->final_props.file_extension;
@@ -137,8 +139,10 @@ struct DownloadLibrary::inf_data DownloadLibrary::DownloadTask::get_inf(){
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
     if(this->follow_redirects)
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    if (curl_easy_perform(curl)!=CURLE_OK)
-        throw std::runtime_error("Cant connect to the server at "+this->url);
+    CURLcode  code = curl_easy_perform(curl);
+    if(code != 0){
+        throw DownloadLibrary::TaskException(code);
+    }
     curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &total_size_buffer);
     curl_easy_header(curl, "Content-Type", 0, CURLH_HEADER, -1, &type);
     curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url_buff_c);
@@ -164,10 +168,10 @@ struct DownloadLibrary::inf_data DownloadLibrary::DownloadTask::get_inf(){
 
         };
 }
-std::vector<DownloadLibrary::part_data> DownloadLibrary::DownloadTask::get_parts(){
+std::vector<DownloadLibrary::part_data> DownloadLibrary::DownloadTaskMultiple::get_parts(){
     return this->parts;
 }
-void DownloadLibrary::DownloadTask::assemble(){
+void DownloadLibrary::DownloadTaskMultiple::assemble(){
 
     std::ofstream final_file (this->task_dir / this->final_props.file_name);
     for (auto n : this->cfg_data["parts"])

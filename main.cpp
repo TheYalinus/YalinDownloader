@@ -19,21 +19,27 @@ int main(){
         }
     }
     b.join();*/
-    DownloadLibrary::DownloadTask a("https://upload.wikimedia.org/wikipedia/commons/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg","/home/cAg/test/",4,user_agent);
+
+    //DownloadLibrary::DownloadTask a("https://fsn1-speed.hetzner.com/100MB.bin","/home/cAg/test/",1,user_agent);
     /*DownloadLibrary::DownloadTask b("/home/cAg/test/",user_agent);*/
-    std::vector<std::thread> threads;
+    /*std::vector<std::thread> threads;
     auto parts = a.get_parts();
     for (auto n : parts){
         threads.push_back(std::thread([&n](){n.req->curlPerform();}));
-        std::this_thread::sleep_for(std::chrono::milliseconds(15));
+        std::this_thread::sleep_for(std::chrono::seconds(2));
     }
     for(auto &n: threads){
         n.join();
         }
+        */
     /*for(auto n : parts)
     {
         n.req->curlPerform();
         }*/
-    a.assemble();
+    //a.assemble();
+    DownloadLibrary::DownloadTask *a = DownloadLibrary::DownloadFactory::createTask("https://upload.wikimedia.org/wikipedia/commons/6/60/Atat%C3%BCrk02.jpg", "/home/cAg/test", 1);
+    //function to give vectors of downloader threads
+
+    delete a;
     return 0;
 }

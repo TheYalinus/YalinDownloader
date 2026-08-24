@@ -56,8 +56,9 @@ CURLcode DownloadLibrary::CurlRequest::curlPerform(){
         this->stream.close();
         this->stream.clear();
         std::ofstream a(this->save_loc);
-        curl_easy_header(curl, "Retry-After", 0, CURLH_HEADER, -1, &retry_after);
         a.close();
+        curl_easy_header(curl, "Retry-After", 0, CURLH_HEADER, -1, &retry_after);
+        std::cout<<retry_after->value<<std::endl;
         this->stream.open(this->save_loc);
         curl_easy_setopt(this->curl, CURLOPT_FILE, &this->stream);
         std::this_thread::sleep_for(std::chrono::seconds(std::stol(retry_after->value)));
