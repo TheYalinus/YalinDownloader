@@ -20,8 +20,8 @@ int main(){
     }
     b.join();*/
 
-    //DownloadLibrary::DownloadTask a("https://fsn1-speed.hetzner.com/100MB.bin","/home/cAg/test/",1,user_agent);
-    /*DownloadLibrary::DownloadTask b("/home/cAg/test/",user_agent);*/
+    //DownloadLibrary::DownloadTaskMultiple b("https://fsn1-speed.hetzner.com/100MB.bin","/home/cAg/test/",1,user_agent);
+    //DownloadLibrary::DownloadTaskMultiple b("/home/cAg/test",user_agent);
     /*std::vector<std::thread> threads;
     auto parts = a.get_parts();
     for (auto n : parts){
@@ -37,9 +37,27 @@ int main(){
         n.req->curlPerform();
         }*/
     //a.assemble();
-    DownloadLibrary::DownloadTask *a = DownloadLibrary::DownloadFactory::createTask("https://upload.wikimedia.org/wikipedia/commons/6/60/Atat%C3%BCrk02.jpg", "/home/cAg/test", 1);
+    //DownloadLibrary::DownloadTask *b = DownloadLibrary::DownloadFactory::createTask("https://fsn1-speed.hetzner.com/100MB.bin", "/home/cAg/test", 4,user_agent);
+    DownloadLibrary::DownloadTask *b = DownloadLibrary::DownloadFactory::createTask("/home/cAg/test",user_agent);
     //function to give vectors of downloader threads
+    // automatic decide part count
+    std::vector<std::thread> threads;
 
-    delete a;
+    std::cout<<"test"<<std::endl;
+    DownloadLibrary::ReqsType req = b->get_requests();
+    for(auto n: req){
+        threads.push_back(std::thread([&n](){n->curlPerform();}));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    for(auto &n: threads){
+            n.join();
+            }
+
+        b->assemble();
+
+
+
+
+    //delete a;
     return 0;
 }

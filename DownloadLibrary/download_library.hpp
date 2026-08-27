@@ -13,6 +13,7 @@
 #include <map>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <thread>
 #include <utility>
 #include <cstdio>
 #include <map>
@@ -22,6 +23,7 @@
 #include <curl/curl.h>
 #include <vector>
 namespace DownloadLibrary {
+
     enum HEADER_FLAG{
         HEADER_ACCEPT,
         HEADER_REJECT
@@ -118,6 +120,9 @@ namespace DownloadLibrary {
             static std::string gen_random_file_name();
             std::string gen_part_name(int i);
             std::string dns;
+            virtual std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> get_requests()=0;
+            virtual void assemble()=0;
+            virtual ~DownloadTask();
 
     };
     class DownloadFactory{
@@ -126,7 +131,8 @@ namespace DownloadLibrary {
             static factory_data gather_get(CURL * curl);
         public:
              static size_t dumm_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
-            static DownloadTask* createTask(std::string url, std::string task_location , int part_count ,  bool follow_redirects = true , file_properties props={"",""} ,std::string user_agent = "", std::string dns ="");
+            static DownloadTask* createTask(std::string url, std::string task_location , int part_count , std::string user_agent = "",  bool follow_redirects = true , file_properties props={"",""} , std::string dns ="");
+            static DownloadTask * createTask(std::string task_location, std::string user_agent="" , std::string dns="", bool follow_redirects=true);
             static int dumm_progress_callback(void *clientp,
                                   curl_off_t  dltotal,
                                   curl_off_t  dlnow,
@@ -149,14 +155,16 @@ namespace DownloadLibrary {
             bool follow_redirects;
             std::string cnttype;
         public:
-            DownloadTaskMultiple(std::string task_location,std::string user_agent="", std::string dns="");
+            DownloadTaskMultiple(std::string task_location,std::string user_agent="", std::string dns="", bool factory_flag = false);
             DownloadTaskMultiple(HEADER_FLAG header ,factory_data fdata ,std::string url,std::string task_location, int part_count, std::string user_agent="", std::string dns="" ,bool follow_redirects = true, struct file_properties={"",""});
+            ~DownloadTaskMultiple();
             void create_json_config(json & n);
             void create_json_config();
             std::vector<part_data> get_parts();
-            void assemble();
-
+            void assemble() override;
+            std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> get_requests() override;
     };
+    using ReqsType = std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>>;
 
 }
 

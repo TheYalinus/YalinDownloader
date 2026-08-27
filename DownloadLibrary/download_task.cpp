@@ -17,6 +17,8 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <thread>
+#include <vector>
 DownloadLibrary::DownloadTask::DownloadTask(std::string task_location, std::string user_agent, std::string dns, DownloadLibrary::file_properties final_props):task_dir(task_location),user_agent(user_agent),dns(dns){
 
 }
@@ -37,37 +39,54 @@ void DownloadLibrary::DownloadTaskMultiple::create_json_config(){
     this->cfg_data["url"]=this->url;
     this->cfg_data["total_size"]=this->total_bytes;
 }
-DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(std::string task_location,std::string user_agent, std::string dns):user_agent(user_agent),DownloadLibrary::DownloadTask(task_location, user_agent,dns){
+DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(std::string task_location,std::string user_agent, std::string dns, bool factory_flag):user_agent(user_agent),DownloadLibrary::DownloadTask(task_location, user_agent,dns){
+    this->task_dir = std::filesystem::path( task_location );
+    this->cfg_path= task_dir / "download.json";
+    if(!factory_flag){
     if(!std::filesystem::exists(task_location))
         throw std::runtime_error("Directory does not exists");
     else if (!std::filesystem::is_directory(task_location))
         throw std::runtime_error("Specified path is not directory.");
     else if(std::filesystem::is_empty(task_location))
         throw std::runtime_error("Directory is empty.");
-    this->task_dir = std::filesystem::path( task_location );
-    this->cfg_path= task_dir / "download.json";
     if(!std::filesystem::exists(cfg_path))
         throw std::runtime_error("There is no download.json file in specified directory");
+    //inf_data id = get_inf();
+    //if(cfg_data["cnt-type"] != id.cnttype || cfg_data["total_size"] != id.totalbytes)
+      //  throw std::runtime_error("Broken link");
+}
     std::fstream cfgstream(cfg_path);
     this->cfg_data=  json::parse(cfgstream);//json::parse_error should be catched by class creator
+    cfgstream.close();
     this->url = cfg_data["url"];
-    inf_data id = get_inf();
-    if(cfg_data["cnt-type"] != id.cnttype || cfg_data["total_size"] != id.totalbytes)
-        throw std::runtime_error("Broken link");
+
     this->cnttype = cfg_data["cnt-type"];
     this->final_props.file_name = cfg_data["file-props"]["filename"];
     this->final_props.file_extension = cfg_data["file-props"]["filename"];
     this->total_bytes= cfg_data["total_size"];
+    std::uintmax_t filesize;
+
     for( auto n : cfg_data["parts"]){
-        std::uintmax_t filesize=std::filesystem::file_size(this->task_dir / n["name"]);
+
+        std::filesystem::path path= this->task_dir / n["name"];
+
+        if(!std::filesystem::exists(path)){
+            std::ofstream a(path);
+            a.close();
+            filesize =0;}
+        else{
+            filesize=std::filesystem::file_size(path);
+        }
         int id = n["id"];
         if(n["size"]==filesize)
             continue;
         RangeType buff (n["range"]);
-        std::cout<<buff.first<<buff.second <<std::endl;
+        buff.first = std::to_string(std::stol(buff.first)+filesize);
+        std::cout<<"Range"<<buff.get_range()<<std::endl;
         /*buff.first= std::to_string(stol(buff.first) + filesize);*/
+
         this->parts.push_back({
-            std::make_shared<DownloadLibrary::CurlRequest>(this->url, n["name"],false,buff,this->user_agent,dns),
+            std::make_shared<DownloadLibrary::CurlRequest>(this->url, this->task_dir / n["name"],false,buff,this->user_agent,dns),
             id,
             static_cast<long>(filesize)
         });
@@ -90,6 +109,7 @@ url(url),part_count(part_count), user_agent(user_agent),parts(part_count),follow
     }
     this->total_bytes = fdata.total_size;
     this->cnttype = fdata.cnt_type;
+    this->cfg_data["header-flag"]= header;
     this->cfg_data["cnt-type"]= this ->cnttype;
     this->cfg_data["file-props"]["filename"]= this->final_props.file_name;
     this->cfg_data["file-props"]["fileextension"]= this->final_props.file_extension;
@@ -100,7 +120,7 @@ url(url),part_count(part_count), user_agent(user_agent),parts(part_count),follow
     create_json_config();
     long def_part_size= total_bytes / part_count;
     long remainder = total_bytes % part_count;
-    std::cout<<"remains "<<remainder<<std::endl;
+
     for(int i=0;i<part_count;i++)
     {
         RangeType buff("","");
@@ -178,7 +198,6 @@ void DownloadLibrary::DownloadTaskMultiple::assemble(){
     {
             std::string name =n["name"];
             std::filesystem::path a (this->task_dir / name);
-            std::cout<<std::filesystem::file_size(a)<< std::endl;
             std::ifstream strm(a);
             final_file<<strm.rdbuf();
 
@@ -190,4 +209,20 @@ void DownloadLibrary::DownloadTaskMultiple::assemble(){
 std::string DownloadLibrary::DownloadTask::gen_random_file_name(){
     //some random name generator will be implemented
     return "Downloaded_file";
+}
+
+std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> DownloadLibrary::DownloadTaskMultiple::get_requests(){
+    std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> reqs;
+    for (auto n : this->parts){
+
+        reqs.push_back(n.req);
+    }
+        return reqs;
+}
+
+DownloadLibrary::DownloadTaskMultiple::~DownloadTaskMultiple(){
+
+}
+DownloadLibrary::DownloadTask::~DownloadTask(){
+
 }

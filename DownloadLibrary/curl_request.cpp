@@ -18,7 +18,7 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
         curl_easy_setopt(this->curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
         curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, write_function);
         if(follow_redirects)
-            std::cout<<"Follow redirects"<<std::endl;
+
             curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
         if(user_agent != " "){
             this->user_agent = user_agent;
@@ -34,6 +34,7 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
             this->file = fopen(this->save_loc.c_str(), "w+");
             }*/
         curl_easy_setopt(this->curl, CURLOPT_FILE, &this->stream);
+
         if(range.first != "ignore"){
 
             curl_easy_setopt(this->curl,  CURLOPT_RANGE, range.get_range().c_str());
@@ -45,10 +46,11 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
 
 }
 CURLcode DownloadLibrary::CurlRequest::curlPerform(){
+    std::cout<<"curlPerform"<<std::endl;
     auto cc =curl_easy_perform(this->curl);
     long http_code=0;
     curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &http_code);
-
+    std::cout<<cc<<"-"<<http_code<<std::endl;
     while(http_code == 429){
         std::cout<<"429"<<std::endl;
         struct curl_header *retry_after;
@@ -58,10 +60,13 @@ CURLcode DownloadLibrary::CurlRequest::curlPerform(){
         std::ofstream a(this->save_loc);
         a.close();
         curl_easy_header(curl, "Retry-After", 0, CURLH_HEADER, -1, &retry_after);
-        std::cout<<retry_after->value<<std::endl;
+        if(retry_after != NULL)
+            std::this_thread::sleep_for(std::chrono::seconds(std::stol(retry_after->value)));
+        else
+            std::this_thread::sleep_for(std::chrono::seconds(3));
         this->stream.open(this->save_loc);
         curl_easy_setopt(this->curl, CURLOPT_FILE, &this->stream);
-        std::this_thread::sleep_for(std::chrono::seconds(std::stol(retry_after->value)));
+
         cc = curl_easy_perform(this->curl);
         curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &http_code);
     }
