@@ -52,12 +52,12 @@ int main(){
     for(auto &n: threads){
             n.join();
             }
-
+            std::cout<<req[0]->downloaded()<<std::endl;
         b->assemble();
 
 
 
 
-    //delete a;
+    delete b;
     return 0;
 }

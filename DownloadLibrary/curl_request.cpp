@@ -17,6 +17,7 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
         curl_easy_setopt(this->curl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(this->curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
         curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, write_function);
+
         if(follow_redirects)
 
             curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -26,7 +27,9 @@ url(url), save_loc(save_loc), header_only(header_only),curl(curl_easy_init()),pr
         }
         if(!std::filesystem::exists(this->save_loc))
         {std::ofstream a(this->save_loc); a.close();}
-        this->stream.open(this->save_loc);
+
+        this->stream.open(this->save_loc, std::ios::app);
+        std::cout<<"Curl Request Debug 2: "<<url<< this->stream.is_open() <<std::endl;
         /*this->file = fopen(this->save_loc.c_str(), "a+");
         if(this->file == nullptr){
             std::cout<<"The file cannot be opened or does not exists"<<std::endl;
