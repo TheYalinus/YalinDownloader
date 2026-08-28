@@ -26,16 +26,16 @@ A Crossplatform, feature rich , fast download manager with parallel downloading 
 
 ###### GUI
 
--It maybe GTK or QT, but i'm more likely to write it in QT, because of Multiplatform support, but writing code in QT like writing in a other language than C++.
+- It maybe GTK or QT, but i'm more likely to write it in QT, because of Multiplatform support, but writing code in QT like writing in a other language than C++.
 
--Everything can be managed from there.
+- Everything can be managed from there.
 
--Simple gui like any other gui nothing to say too more.
+- Simple gui like any other gui nothing to say too more.
 
 
 ###### TUI
 
-- Tui written by ncurses would be good
+- Tui written in ncurses would be good
 
 - Like gui nothing to say too more 
 
