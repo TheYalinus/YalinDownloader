@@ -211,7 +211,7 @@ std::string DownloadLibrary::DownloadTask::gen_random_file_name(){
     return "Downloaded_file";
 }
 
-std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> DownloadLibrary::DownloadTaskMultiple::get_requests(){
+DownloadLibrary::ReqsType DownloadLibrary::DownloadTaskMultiple::get_requests(){
     std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> reqs;
     for (auto n : this->parts){
 

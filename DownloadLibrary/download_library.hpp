@@ -83,6 +83,7 @@ namespace DownloadLibrary {
                                   curl_off_t  ulnow);
             static size_t write_function(char * data , size_t size , size_t nmemb, void * clientp);
             int downloaded();
+            std::atomic<long>* downloaded_ptr();
             void stop();
             void deletef();
             ~CurlRequest();
@@ -143,6 +144,9 @@ namespace DownloadLibrary {
                                   curl_off_t  ulnow);
 
     };
+    using ReqsType = std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>>;
+    using ThreadsType = std::vector<std::shared_ptr<std::thread>>;
+
     class DownloadTaskMultiple: public DownloadLibrary::DownloadTask{
         private:
             HEADER_FLAG header;
@@ -166,9 +170,21 @@ namespace DownloadLibrary {
             std::vector<part_data> get_parts();
             void assemble() override;
             void clean() override;
-            std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> get_requests() override;
+            ReqsType get_requests() override;
     };
-    using ReqsType = std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>>;
+    class ParallelDownloader{
+        public:
+            ParallelDownloader(ReqsType reqs);
+            long total_download();
+            ThreadsType get_threads();
+            void join_threads();
+        private:
+            ReqsType reqs;
+            ThreadsType threads;
+            std::vector<std::atomic<long> *> progress_handlers;
+
+    };
+
 
 }
 

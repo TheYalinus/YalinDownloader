@@ -108,3 +108,6 @@ size_t DownloadLibrary::CurlRequest::write_function(char * data , size_t size , 
 void DownloadLibrary::CurlRequest::deletef(){
     std::filesystem::remove(this->save_loc);
 }
+std::atomic<long>* DownloadLibrary::CurlRequest::downloaded_ptr(){
+    return &this->progress_data.total_download;
+}
