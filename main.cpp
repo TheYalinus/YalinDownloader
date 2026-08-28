@@ -37,8 +37,8 @@ int main(){
         n.req->curlPerform();
         }*/
     //a.assemble();
-    //DownloadLibrary::DownloadTask *b = DownloadLibrary::DownloadFactory::createTask("https://fsn1-speed.hetzner.com/100MB.bin", "/home/cAg/test", 4,user_agent);
-    DownloadLibrary::DownloadTask *b = DownloadLibrary::DownloadFactory::createTask("/home/cAg/test",user_agent);
+    DownloadLibrary::DownloadTask *b = DownloadLibrary::DownloadFactory::createTask("https://mirror.23m.com/archlinux/iso/2026.08.01/archlinux-2026.08.01-x86_64.iso", "/home/cAg/test", 4,user_agent);
+    //DownloadLibrary::DownloadTask *b = DownloadLibrary::DownloadFactory::createTask("/home/cAg/test",user_agent);
     //function to give vectors of downloader threads
     // automatic decide part count
     std::vector<std::thread> threads;
@@ -53,7 +53,8 @@ int main(){
             n.join();
             }
             std::cout<<req[0]->downloaded()<<std::endl;
-        b->assemble();
+    b->assemble();
+    b->clean();
 
 
 

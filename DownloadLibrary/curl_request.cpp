@@ -105,3 +105,6 @@ size_t DownloadLibrary::CurlRequest::write_function(char * data , size_t size , 
     fs->flush();
     return nmemb;
 }
+void DownloadLibrary::CurlRequest::deletef(){
+    std::filesystem::remove(this->save_loc);
+}

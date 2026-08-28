@@ -219,7 +219,12 @@ std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> DownloadLibrary::Down
     }
         return reqs;
 }
-
+ void DownloadLibrary::DownloadTaskMultiple::clean(){
+     for(auto n: this-> parts)
+     {
+         n.req->deletef();
+     }
+ }
 DownloadLibrary::DownloadTaskMultiple::~DownloadTaskMultiple(){
 
 }

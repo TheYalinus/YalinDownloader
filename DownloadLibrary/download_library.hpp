@@ -84,7 +84,9 @@ namespace DownloadLibrary {
             static size_t write_function(char * data , size_t size , size_t nmemb, void * clientp);
             int downloaded();
             void stop();
+            void deletef();
             ~CurlRequest();
+
     };
     struct part_data{
         std::shared_ptr<CurlRequest> req;
@@ -122,6 +124,7 @@ namespace DownloadLibrary {
             std::string dns;
             virtual std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> get_requests()=0;
             virtual void assemble()=0;
+            virtual void clean()=0;
             virtual ~DownloadTask();
 
     };
@@ -162,6 +165,7 @@ namespace DownloadLibrary {
             void create_json_config();
             std::vector<part_data> get_parts();
             void assemble() override;
+            void clean() override;
             std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> get_requests() override;
     };
     using ReqsType = std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>>;
