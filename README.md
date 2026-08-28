@@ -45,4 +45,4 @@ A Crossplatform, feature rich , fast download manager with parallel downloading 
 
 - On Windows, i dont know much about Windows programming, but i just know it should be a service.
 
-- Without this service, browser extension can not work, also TUI and GUI will not be syncronised.
+- Without this service, browser extension can not manage downloads -but can still do media capturing etc.- , also TUI and GUI will not be syncronised.
