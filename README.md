@@ -6,23 +6,23 @@ A Crossplatform, feature rich , fast download manager with parallel downloading 
 
 ###### Implement more features in DownloadLibrary:
 
--HTTP Authentication
+- HTTP Authentication
 
--Proxy support
+- Proxy support
 
--Other protocols support like FTP
+- Other protocols support like FTP
 
-######Browser Extension(for now, i'll just write it for firefox)
+###### Browser Extension(for now, i'll just write it for firefox)
 
--Media capturing
+- Media capturing
 
--Download everything in the page
+- Download everything in the page
 
--Bulk media downloading that can also managed by extension(it should work like right click->add this page to download list)
+- Bulk media downloading that can also managed by extension(it should work like right click->add this page to download list)
 
--Manage download tasks from your browser too
+- Manage download tasks from your browser too
 
--JDOWNLOADER links support
+- JDOWNLOADER links support
 
 ###### GUI
 
@@ -35,14 +35,14 @@ A Crossplatform, feature rich , fast download manager with parallel downloading 
 
 ###### TUI
 
--Tui written by ncurses would be good
+- Tui written by ncurses would be good
 
--Like gui nothing to say too more 
+- Like gui nothing to say too more 
 
 ###### Non-Mandatory Background Service
 
--On linux it will be a SYS-V style daemon, but i want to put OpenRC support too, i'll do it somehow
+- On linux it will be a SYS-V style daemon, but i want to put OpenRC support too, i'll do it somehow
 
--On Windows, i dont know much about Windows programming, but i just know it should be a service.
+- On Windows, i dont know much about Windows programming, but i just know it should be a service.
 
--Without this service, browser extension can not work, also TUI and GUI will not be syncronised.
+- Without this service, browser extension can not work, also TUI and GUI will not be syncronised.
