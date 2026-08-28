@@ -2,6 +2,8 @@
 
 A Crossplatform, feature rich , fast download manager with parallel downloading and bulk media downloading. Written fully in C++. Powered by Libcurl.
 
+Not written by AI, i didnt use AI, all the codes are just written by hand.  
+
 ##### TODO:
 
 ###### Implement more features in DownloadLibrary:
@@ -46,3 +48,6 @@ A Crossplatform, feature rich , fast download manager with parallel downloading 
 - On Windows, i dont know much about Windows programming, but i just know it should be a service.
 
 - Without this service, browser extension can not manage downloads -but can still do media capturing etc.- , also TUI and GUI will not be syncronised.
+
+
+About git history: i've a bit messed with git first when pushing all the code into remote, coursely i didnt write all the code in 1 hours. To the "Clean function" commit (19774e1c83ec90b507338ffd67803f7021e59e70) there is 2 weeks of work done. Before this i've written many projects did many but none of them are serious. I had a Github Account but everything is confused on it. Excuse me for my wrongs. This my first serious project. I'm beliving i'll be better.
