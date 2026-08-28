@@ -2,9 +2,9 @@
 
 A Crossplatform, feature rich , fast download manager with parallel downloading and bulk media downloading. Written fully in C++. Powered by Libcurl.
 
-#####TODO:
+##### TODO:
 
-######Implement more features in DownloadLibrary:
+###### Implement more features in DownloadLibrary:
 -HTTP Authentication
 -Proxy support
 -Other protocols support like FTP
@@ -17,18 +17,18 @@ A Crossplatform, feature rich , fast download manager with parallel downloading 
 -Manage download tasks from your browser too
 -JDOWNLOADER links support
 
-######GUI
+###### GUI
 
 -It maybe GTK or QT, but i'm more likely to write it in QT, because of Multiplatform support, but writing code in QT like writing in a other language than C++.
 -Everything can be managed from there.
 -Simple gui like any other gui nothing to say too more.
 
-######TUI
+###### TUI
 
 -Tui written by ncurses would be good
 -Like gui nothing to say too more 
 
-######Non-Mandatory Background Service
+###### Non-Mandatory Background Service
 
 -On linux it will be a SYS-V style daemon, but i want to put OpenRC support too, i'll do it somehow
 -On Windows, i dont know much about Windows programming, but i just know it should be a service.
