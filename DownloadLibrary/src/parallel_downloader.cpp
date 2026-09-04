@@ -1,4 +1,6 @@
 #include "download_library.hpp"
+#include "parallel_downloader.hpp"
+#include "curl_request.hpp"
 #include <atomic>
 #include <functional>
 #include <memory>
@@ -9,7 +11,7 @@ DownloadLibrary::ParallelDownloader::ParallelDownloader(DownloadLibrary::ReqsTyp
 reqs(reqs),threads(std::vector<std::shared_ptr<std::thread>>()),progress_handlers(std::vector<std::atomic<long> *>()){
     for(auto n: reqs){
         this->threads.push_back(std::make_shared<std::thread>(std::thread([n](){n->curlPerform();})));
-        this->progress_handlers.push_back(n->downloaded_ptr());
+        this->progress_handlers.push_back(n->pGetDownloaded());
     }
 
 }

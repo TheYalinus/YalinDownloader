@@ -1,5 +1,6 @@
 #include "download_factory.hpp"
-#include "download_library.hpp"
+#include "download_task_multi.hpp"
+
 #include <curl/easy.h>
 #include <stdexcept>
 #include <string>

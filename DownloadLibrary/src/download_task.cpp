@@ -1,4 +1,5 @@
-#include "download_library.hpp"
+#include "download_task_multi.hpp"
+
 #include <chrono>
 #include <cmath>
 #include <cstddef>
@@ -222,7 +223,7 @@ DownloadLibrary::ReqsType DownloadLibrary::DownloadTaskMultiple::get_requests(){
  void DownloadLibrary::DownloadTaskMultiple::clean(){
      for(auto n: this-> parts)
      {
-         n.req->deletef();
+         n.req->deleteF();
      }
  }
 DownloadLibrary::DownloadTaskMultiple::~DownloadTaskMultiple(){

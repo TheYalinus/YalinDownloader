@@ -59,36 +59,8 @@ namespace DownloadLibrary {
             std::string get_range();
     };
     using json =nlohmann::json;
-    class CurlRequest: std::enable_shared_from_this<CurlRequest>{
-        private:
-            std::string url;
-            std::string range;
-            std::string save_loc;
-            bool header_only;
-            FILE* file;
-            CURL* curl;
-            std::string user_agent;
-            struct progress_data progress_data;
-            std::fstream stream;
+    class CurlRequest;
 
-
-        public:
-            CurlRequest(std::string url,std::string save_loc,bool header_only,RangeType range = {"",""},  std::string user_agent =" ", std::string dns ="", bool follow_redirects=true);
-            CURLcode curlPerform();
-            void setUserAgent(std::string agent);
-            static int progress_callback(void *clientp,
-                                  curl_off_t  dltotal,
-                                  curl_off_t  dlnow,
-                                  curl_off_t  ultotal,
-                                  curl_off_t  ulnow);
-            static size_t write_function(char * data , size_t size , size_t nmemb, void * clientp);
-            int downloaded();
-            std::atomic<long>* downloaded_ptr();
-            void stop();
-            void deletef();
-            ~CurlRequest();
-
-    };
     struct part_data{
         std::shared_ptr<CurlRequest> req;
         int part_id ;
@@ -109,81 +81,12 @@ namespace DownloadLibrary {
         std::string efct_url;
         file_properties props;
     };
-    class DownloadTask{
-        public:
-            long total_bytes;
-            long total_downloaded_bytes;
-            std::filesystem::path task_dir;
-            std::string url;
-            std::string user_agent;
-            struct file_properties final_props;
-            bool follow_redirects;
-            DownloadTask(std::string task_location, std::string user_agent="", std::string dns="", file_properties final_props = {"",""});
-            struct inf_data get_inf();
-            static std::string gen_random_file_name();
-            std::string gen_part_name(int i);
-            std::string dns;
-            virtual std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> get_requests()=0;
-            virtual void assemble()=0;
-            virtual void clean()=0;
-            virtual ~DownloadTask();
-
-    };
-    class DownloadFactory{
-        private:
-            static factory_data gather_head(CURL * curl);
-            static factory_data gather_get(CURL * curl);
-        public:
-             static size_t dumm_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
-            static DownloadTask* createTask(std::string url, std::string task_location , int part_count , std::string user_agent = "",  bool follow_redirects = true , file_properties props={"",""} , std::string dns ="");
-            static DownloadTask * createTask(std::string task_location, std::string user_agent="" , std::string dns="", bool follow_redirects=true);
-            static int dumm_progress_callback(void *clientp,
-                                  curl_off_t  dltotal,
-                                  curl_off_t  dlnow,
-                                  curl_off_t  ultotal,
-                                  curl_off_t  ulnow);
-
-    };
+    class DownloadTask;
+    class DownloadFactory;
     using ReqsType = std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>>;
     using ThreadsType = std::vector<std::shared_ptr<std::thread>>;
+    class ParallelDownloader;
 
-    class DownloadTaskMultiple: public DownloadLibrary::DownloadTask{
-        private:
-            HEADER_FLAG header;
-            int part_count;
-            long total_bytes;
-            long total_downloaded_bytes;
-            std::filesystem::path task_dir;
-            std::filesystem::path cfg_path;
-            std::vector<part_data> parts;
-            std::string url;
-            std::string user_agent;
-            json cfg_data;
-            bool follow_redirects;
-            std::string cnttype;
-        public:
-            DownloadTaskMultiple(std::string task_location,std::string user_agent="", std::string dns="", bool factory_flag = false);
-            DownloadTaskMultiple(HEADER_FLAG header ,factory_data fdata ,std::string url,std::string task_location, int part_count, std::string user_agent="", std::string dns="" ,bool follow_redirects = true, struct file_properties={"",""});
-            ~DownloadTaskMultiple();
-            void create_json_config(json & n);
-            void create_json_config();
-            std::vector<part_data> get_parts();
-            void assemble() override;
-            void clean() override;
-            ReqsType get_requests() override;
-    };
-    class ParallelDownloader{
-        public:
-            ParallelDownloader(ReqsType reqs);
-            long total_download();
-            ThreadsType get_threads();
-            void join_threads();
-        private:
-            ReqsType reqs;
-            ThreadsType threads;
-            std::vector<std::atomic<long> *> progress_handlers;
-
-    };
 
 
 }
