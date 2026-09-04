@@ -41,9 +41,9 @@ Not written by AI, i didnt use AI, all the codes are just written by hand. I do 
 
 - Like gui nothing to say too more 
 
-###### Non-Mandatory Background Service
+###### Non-Mandatory Background Service -this could be obsolote-
 
-- On linux it will be a SYS-V style daemon, but i want to put OpenRC support too, i'll do it somehow
+- On linux it will be a Modern SystemD style daemon, but i want to put OpenRC support too, i'll do it somehow
 
 - On Windows, i dont know much about Windows programming, but i just know it should be a service.
 

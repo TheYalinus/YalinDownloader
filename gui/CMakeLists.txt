@@ -1,0 +1,5 @@
+add_executable(YalinDownloaderGui gui.cpp gui.hpp main_window.cpp main_window.hpp)
+target_link_libraries(YalinDownloaderGui PRIVATE DownloadLibrary)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
+target_link_libraries(YalinDownloaderGui PUBLIC PkgConfig::GTKMM)
