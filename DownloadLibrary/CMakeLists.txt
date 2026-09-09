@@ -10,3 +10,9 @@ find_package(CURL 8.12.0 REQUIRED)
 find_package(nlohmann_json 3.12.0 REQUIRED)
 target_link_libraries(DownloadLibrary PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(DownloadLibrary PRIVATE CURL::libcurl)
+add_executable(hetzner_test tests/test_hetzner.cpp)
+target_link_libraries(hetzner_test PRIVATE DownloadLibrary)
+add_test(
+  NAME hetzner_test
+  COMMAND $<TARGET_FILE:hetzner_test>
+  )

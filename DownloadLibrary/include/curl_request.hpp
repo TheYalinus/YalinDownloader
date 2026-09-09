@@ -1,6 +1,7 @@
 #ifndef CURL_REQUEST_HPP
 #define CURL_REQUEST_HPP
 #include "download_library.hpp"
+#include "connection_pool.hpp"
 namespace DownloadLibrary {
     class CurlRequest{
         private:
@@ -13,8 +14,9 @@ namespace DownloadLibrary {
             std::string usrAgent;
             struct progress_data prgData;
             std::fstream dataStream;
+            sharedPoolType connectionPool;
         public:
-            CurlRequest(std::string url,std::string saveLoc,bool isHdrOnly,RangeType dwnRange = {"",""},  std::string usrAgent =" ", std::string dns ="", bool flwRedirect=true);
+            CurlRequest(sharedPoolType connectionPool , std::string url,std::string saveLoc,bool isHdrOnly,RangeType dwnRange = {"",""},  std::string usrAgent =" ", std::string dns ="", bool flwRedirect=true);
             CURLcode curlPerform();
             void setUserAgent(std::string agent);
             static int progress_callback(void *clientp,

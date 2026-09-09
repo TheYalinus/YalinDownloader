@@ -1,6 +1,7 @@
 #ifndef PARALLEL_DOWNLOADER_HPP
 #define PARALLEL_DOWNLOADER_HPP
 #include "download_library.hpp"
+
 namespace DownloadLibrary {
     class ParallelDownloader{
         public:

@@ -11,16 +11,16 @@
 #include <stdexcept>
 #include <thread>
 
+//May be this class name converted to more sensible name like Part
+DownloadLibrary::CurlRequest::CurlRequest(sharedPoolType connectionPool , std::string url, std::string save_loc , bool header_only, RangeType range,  std::string user_agent, std::string dns , bool follow_redirects):
+Url(url), saveLoc(save_loc), isHdrOnly(header_only),prgData{0,0},dataStream(std::fstream()){
 
-DownloadLibrary::CurlRequest::CurlRequest(std::string url, std::string save_loc , bool header_only, RangeType range,  std::string user_agent, std::string dns , bool follow_redirects):
-Url(url), saveLoc(save_loc), isHdrOnly(header_only),curl(curl_easy_init()),prgData{0,0},dataStream(std::fstream()){
         curl_easy_setopt(this->curl, CURLOPT_XFERINFODATA, reinterpret_cast<void *>(&this->prgData));
         curl_easy_setopt(this->curl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(this->curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
         curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, write_function);
 
         if(follow_redirects)
-
             curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
         if(user_agent != " "){
             this->usrAgent = user_agent;

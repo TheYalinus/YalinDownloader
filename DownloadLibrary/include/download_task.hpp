@@ -14,9 +14,10 @@ namespace DownloadLibrary {
             std::filesystem::path task_dir;
             std::string url;
             std::string user_agent;
-        public:
-
             struct file_properties final_props;
+        public:
+            std::string getFinalFileName();
+            std::filesystem::path getTaskPath();
             bool follow_redirects;
             DownloadTask(std::string task_location, std::string user_agent="", std::string dns="", file_properties final_props = {"",""});
             virtual std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> get_requests()=0;

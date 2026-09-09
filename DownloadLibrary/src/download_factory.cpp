@@ -4,6 +4,8 @@
 #include <curl/easy.h>
 #include <stdexcept>
 #include <string>
+//check are things like download location etc. are okay inside factory
+//add thread pool system to downloader
 DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std::string url, std::string task_location, int part_count, std::string user_agent,  bool follow_redirects,file_properties props , std::string dns){
         factory_data result;
         CURL * curl = curl_easy_init();
@@ -24,6 +26,7 @@ DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std:
         }
         else if(result_code ==56){
             result = gather_get(curl);
+
             curl_easy_cleanup(curl);
             return new DownloadTaskMultiple(HEADER_REJECT,result, url, task_location, part_count, user_agent, dns, follow_redirects, props );
             //pass the resulst to class
@@ -69,23 +72,25 @@ DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std:
         curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &total_size_buffer);
         std::cout<<total_size_buffer<<std::endl;
         curl_easy_header(curl, "Content-Type", 0, CURLH_HEADER, -1, &type);
-        if(effective_url_buff_c == NULL){
+        if(effective_url_buff_c != NULL){
+            std::string effective_url_buff(effective_url_buff_c);
+            full_file_name = effective_url_buff.substr(effective_url_buff.find_last_of("/")+1,(effective_url_buff.find('?')-(effective_url_buff.find_last_of("/")))-1);
+            extension = full_file_name.substr(full_file_name.find_last_of(".")+1);
+        }
+        else{
             std::cerr<<"Libcurl has not given the effective url, so the name cannot be determined";
             extension="";
             //random name gen
             full_file_name  = "Unknown File";
         }
-        else{
-            std::string effective_url_buff(effective_url_buff_c);
-            full_file_name = effective_url_buff.substr(effective_url_buff.find_last_of("/")+1,(effective_url_buff.find('?')-(effective_url_buff.find_last_of("/")))-1);
-            extension = full_file_name.substr(full_file_name.find_last_of(".")+1);
-        }
-        curl_easy_cleanup(curl);std::cout<<result_code<<std::endl;
+
+        std::cout<<"Debug"<<result_code<<std::endl;
         result.props.file_name= full_file_name;
         result.props.file_extension= extension;
         result.cnt_type = type->value;
         result.efct_url= effective_url_buff_c;
         result.total_size= total_size_buffer;
+        curl_easy_cleanup(curl);
         return result;
     }
     DownloadLibrary::factory_data DownloadLibrary::DownloadFactory::gather_head(CURL * curl){

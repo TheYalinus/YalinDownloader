@@ -86,7 +86,8 @@ namespace DownloadLibrary {
     using ReqsType = std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>>;
     using ThreadsType = std::vector<std::shared_ptr<std::thread>>;
     class ParallelDownloader;
-
+    class ConnectionPool;
+    class CurlWrapper;
 
 
 }
