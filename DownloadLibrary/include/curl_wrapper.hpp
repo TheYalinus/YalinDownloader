@@ -4,6 +4,7 @@
 #include <curl/easy.h>
 #include <memory>
 #include "download_library.hpp"
+//file wrapper that uses the same at curl_request, it should be moved here
 namespace DownloadLibrary {
     using uniqueCurlHandleType = std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> ;
     class CurlWrapper{
@@ -15,6 +16,8 @@ namespace DownloadLibrary {
             void setRange(RangeType);
             void setHeaderOnly(bool=true);
             void setFollowRedirects(bool=true);
+            void setProgress(bool=true);
+            void setUsrAgent(std::string);
             void resetAttributes();
             CURL * getRawCurl();
             std::pair <CURLcode,long> executeCurl();

@@ -15,6 +15,6 @@ project(
   LANGUAGES CXX
 )
 add_subdirectory(DownloadLibrary)
-add_subdirectory(gui)
-add_executable(main main.cpp)
-target_link_libraries(main PRIVATE DownloadLibrary)
+#add_subdirectory(gui)
+#add_executable(main main.cpp)
+#target_link_libraries(main PRIVATE DownloadLibrary)

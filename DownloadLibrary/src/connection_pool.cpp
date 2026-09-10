@@ -11,7 +11,11 @@ DownloadLibrary::ConnectionPool::ConnectionPool(int n)
 :curlConnections(CurlWrapperMapType {})
 {
     for(int i =0 ; i<n ; i++){
+        std::cout<<"Connection a"<<std::endl;
         curlConnections.emplace(i, std::make_shared<CurlWrapper>());
+        //do it better , maybe you can place it into ctor
+        // and make it a curl wrapper function
+        curl_easy_setopt(curlConnections[i]->getRawCurl(), CURLOPT_TCP_KEEPALIVE, 1L);
     }
 
 }

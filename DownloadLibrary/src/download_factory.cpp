@@ -1,13 +1,16 @@
 #include "download_factory.hpp"
+#include "connection_pool.hpp"
 #include "download_task_multi.hpp"
 
 #include <curl/easy.h>
+#include <memory>
 #include <stdexcept>
 #include <string>
 //check are things like download location etc. are okay inside factory
 //add thread pool system to downloader
-DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std::string url, std::string task_location, int part_count, std::string user_agent,  bool follow_redirects,file_properties props , std::string dns){
+DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std::string url, std::string task_location, int part_count, int connection_number ,std::string user_agent,  bool follow_redirects,file_properties props , std::string dns){
         factory_data result;
+        //implement the new curlwrapper usage here
         CURL * curl = curl_easy_init();
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         if(!dns.empty())
@@ -21,14 +24,15 @@ DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std:
         CURLcode  result_code = curl_easy_perform(curl);
         if(result_code ==CURLE_OK){
             result = gather_head(curl);
+            auto connectionPool = std::make_shared<ConnectionPool>(connection_number);
             curl_easy_cleanup(curl);
-            return new DownloadTaskMultiple(HEADER_ACCEPT,result,url,task_location,part_count,user_agent,dns,follow_redirects,props);
+            return new DownloadTaskMultiple(HEADER_ACCEPT,connectionPool,result,url,task_location,part_count,user_agent,dns,follow_redirects,props);
         }
         else if(result_code ==56){
             result = gather_get(curl);
-
+            auto connectionPool = std::make_shared<ConnectionPool>(connection_number);
             curl_easy_cleanup(curl);
-            return new DownloadTaskMultiple(HEADER_REJECT,result, url, task_location, part_count, user_agent, dns, follow_redirects, props );
+            return new DownloadTaskMultiple(HEADER_REJECT,connectionPool ,result, url, task_location, part_count, user_agent, dns, follow_redirects, props );
             //pass the resulst to class
         }
         else{
@@ -123,7 +127,7 @@ DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std:
         result.total_size= total_size_buffer;
         return result;
     }
-    DownloadLibrary::DownloadTask * DownloadLibrary::DownloadFactory::createTask(std::string task_location, std::string user_agent, std::string dns, bool follow_redirects){
+    DownloadLibrary::DownloadTask * DownloadLibrary::DownloadFactory::createTask(std::string task_location, int connection_number,  std::string user_agent, std::string dns, bool follow_redirects){
         if(!std::filesystem::exists(task_location))
             throw std::runtime_error("Directory does not exists");
         else if (!std::filesystem::is_directory(task_location))
@@ -169,5 +173,6 @@ DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std:
         if(cnttype !=  fdata.cnt_type || totalsize != static_cast<int>(fdata.total_size))
             throw std::runtime_error("Broken link");
         curl_easy_cleanup(curl);
-        return new DownloadLibrary::DownloadTaskMultiple(task_location, user_agent, dns,true);
+        auto connectionPool = std::make_shared<ConnectionPool>(connection_number);
+        return new DownloadLibrary::DownloadTaskMultiple(task_location,connectionPool, user_agent, dns,true);
     }

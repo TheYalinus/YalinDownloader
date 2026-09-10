@@ -98,7 +98,7 @@ DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(std::string task_loc
 
 }
 DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(DownloadLibrary::HEADER_FLAG header ,sharedPoolType connectionPool,DownloadLibrary::factory_data fdata , std::string url,std::string task_location, int part_count, std::string user_agent, std::string dns,  bool follow_redirects ,struct file_properties final_props): DownloadLibrary::DownloadTask(task_location,user_agent,dns,final_props),
-url(url),part_count(part_count), user_agent(user_agent),parts(part_count),follow_redirects(follow_redirects),header(header){
+url(url),part_count(part_count), user_agent(user_agent),parts(part_count),follow_redirects(follow_redirects),header(header),connectionPool(connectionPool){
     std::cout<<"Debug2"<<std::endl;
     if(!std::filesystem::exists(task_location))
         throw std::runtime_error("Task directory does not exists");

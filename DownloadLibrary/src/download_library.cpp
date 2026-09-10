@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+//write a default ctor for rangetype
 std::string DownloadLibrary::RangeType::get_range(){
     if(!this->first.empty() && !this->second.empty())
         return (this->first + "-" + this->second + '\0');

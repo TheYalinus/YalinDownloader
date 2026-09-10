@@ -49,3 +49,12 @@ std::pair <CURLcode,long> DownloadLibrary::CurlWrapper::executeCurl(){
     curl_easy_getinfo(this->curl_handle.get(), CURLINFO_RESPONSE_CODE, &http_code);
     return {code , http_code};
 }
+void DownloadLibrary::CurlWrapper::setProgress(bool option){
+    if(option)
+        curl_easy_setopt(this->curl_handle.get(), CURLOPT_NOPROGRESS, 0L);
+    else
+        curl_easy_setopt(this->curl_handle.get(), CURLOPT_NOPROGRESS, 1L);
+}
+void DownloadLibrary::CurlWrapper::setUsrAgent(std::string usrAgent){
+    curl_easy_setopt(this->curl_handle.get(), CURLOPT_USERAGENT, usrAgent.c_str());
+}

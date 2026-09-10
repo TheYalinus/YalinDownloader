@@ -10,11 +10,13 @@ namespace DownloadLibrary {
             std::string saveLoc;
             bool isHdrOnly;
             FILE* file;
-            CURL* curl;
             std::string usrAgent;
             struct progress_data prgData;
             std::fstream dataStream;
             sharedPoolType connectionPool;
+            bool followRedirects;
+            RangeType range;
+            std::string dns;
         public:
             CurlRequest(sharedPoolType connectionPool , std::string url,std::string saveLoc,bool isHdrOnly,RangeType dwnRange = {"",""},  std::string usrAgent =" ", std::string dns ="", bool flwRedirect=true);
             CURLcode curlPerform();
