@@ -8,7 +8,7 @@
 #define  FILESIZE 104857600
 int main(){
     std::string user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.3";
-    DownloadLibrary::DownloadTask * task= DownloadLibrary::DownloadFactory::createTask("https://fsn1-speed.hetzner.com/100MB.bin","/home/cAg/test",8,3, user_agent);
+    DownloadLibrary::DownloadTask * task= DownloadLibrary::DownloadFactory::createTask("https://fsn1-speed.hetzner.com/100MB.bin","/home/cAg/test",4,3, user_agent);
     {
         DownloadLibrary::ParallelDownloader downloader(task->get_requests());
         downloader.join_threads();

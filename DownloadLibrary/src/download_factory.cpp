@@ -19,7 +19,7 @@ DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std:
             curl_easy_setopt(curl, CURLOPT_USERAGENT, user_agent.c_str());
         if(follow_redirects)
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
+        //set thread count and part count automatically
         curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
         CURLcode  result_code = curl_easy_perform(curl);
         if(result_code ==CURLE_OK){

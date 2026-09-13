@@ -1,9 +1,13 @@
 #include "main_window.hpp"
+#include "downloader_table.hpp"
 
 #include <glib.h>
+#include <glibmm/refptr.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/enums.h>
+#include <gtkmm/label.h>
+#include <gtkmm/object.h>
 #include <memory>
 
 MainWindow::MainWindow():
@@ -20,6 +24,7 @@ TopButtonOpen("Open"),
 TopButtonSettings("Settings"),
 TopButtonOpeninFolder("Open in Folder"),
 Logo("Yalin Downloader"),
+MainTable(),
 MainFrame("Active Downloads"){
     set_title("Yalin Downloader GUI");
     set_child(MainBox);
@@ -60,8 +65,14 @@ MainFrame("Active Downloads"){
     CentralCenterPanel.append(MainFrame);
     MainFrame.set_margin(5);
     MainFrame.set_child(MainTable);
-    MainTable.set_margin(2);
-
+    MainTable.set_margin(5);
+    auto label = Gtk::make_managed<Gtk::Label>("Download 1");
+    auto label2 = Gtk::make_managed<Gtk::Label>("Download 2");
+    MainTable.insertDownload(
+        *label);
+    MainTable.insertDownload(
+        *label2
+    );
 
 
 }

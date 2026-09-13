@@ -9,6 +9,7 @@ curl_handle(curl_easy_init(), &curl_easy_cleanup){
 }
 
 void DownloadLibrary::CurlWrapper::setUrl(std::string url){
+    //TODO : dont set url if already set to same
     curl_easy_setopt(this->curl_handle.get(),CURLOPT_URL,url.c_str());
 }
 void DownloadLibrary::CurlWrapper::setDns(std::string dns){

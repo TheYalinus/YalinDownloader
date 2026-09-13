@@ -6,6 +6,7 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/label.h>
 #include <gtkmm/togglebutton.h>
+#include "downloader_table.hpp"
 class MainWindow : public Gtk::Window
 {
     public:
@@ -17,6 +18,6 @@ class MainWindow : public Gtk::Window
         Gtk::Button TopButtonNew, TopButtonOpen, TopButtonOpeninFolder , TopButtonMediaGrabber, TopButtonSettings;
         Gtk::Label Logo;
         Gtk::Frame MainFrame;
-        Gtk::Grid MainTable;
+        DownloaderTable MainTable;
 };
 #endif
