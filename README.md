@@ -2,7 +2,7 @@
 
 A Crossplatform, feature rich , fast download manager with parallel downloading and bulk media downloading. Written fully in C++. Powered by Libcurl.
 
-Not written by AI, i didnt use AI, all the codes are just written by hand. I do believe in human intelligence.
+Not written by AI, i didnt used AI, all the codes are just written by hand. I do believe in human intelligence.
 
 ##### TODO:
 

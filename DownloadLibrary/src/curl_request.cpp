@@ -49,6 +49,7 @@ CURLcode DownloadLibrary::CurlRequest::curlPerform(){
         curlw->setDns(this->dns);
 
     curlw->setUrl(this->Url);
+    curlw->setHeaderOnly(false);
     std::cout<<"curlPerform"<<std::endl;
     CURLcode cc;
     long http_code;
