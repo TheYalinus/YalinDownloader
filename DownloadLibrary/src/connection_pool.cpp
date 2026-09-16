@@ -11,15 +11,17 @@
 #include <tuple>
 
 DownloadLibrary::ConnectionPool::ConnectionPool(int n)
-:curlConnections(CurlWrapperMapType {})
+:curlConnections(CurlWrapperMapType {}),
+curlShare()
 {
+    curlShare.setDNSShare();
     for(int i =0 ; i<n ; i++){
         std::cout<<"Connection a"<<std::endl;
         curlConnections.emplace(i, std::make_shared<CurlWrapper>());
-        //do it better , maybe you can place it into ctor
-        // and make it a curl wrapper function
         curl_easy_setopt(curlConnections[i]->getRawCurl(), CURLOPT_TCP_KEEPALIVE, 1L);
+        curlConnections[i]->setShareHandle(this->curlShare.getSharePtr());
     }
+
 
 }
 DownloadLibrary::CurlWrapperPairType DownloadLibrary::ConnectionPool::getConnection(){
@@ -53,6 +55,7 @@ DownloadLibrary::factory_data DownloadLibrary::ConnectionPool::initalizeConnecti
     //tod : use a share interface and write a wrapper for it
     for(auto &n : this->curlConnections){
         n.second->setUrl(url);
+
         if(!dns.empty())
             n.second->setDns(dns);
         if(!user_agent.empty())

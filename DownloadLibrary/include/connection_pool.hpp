@@ -7,6 +7,7 @@
 #include <tuple>
 #include "download_library.hpp"
 #include "curl_wrapper.hpp"
+#include "share_wrapper.hpp"
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/header.h>
@@ -26,6 +27,7 @@ namespace DownloadLibrary {
             std::condition_variable cv;
             CurlWrapperMapType curlConnections;
             static size_t dumm_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
+            ShareWrapper curlShare;
     };
     using sharedPoolType = std::shared_ptr<ConnectionPool>;
 };

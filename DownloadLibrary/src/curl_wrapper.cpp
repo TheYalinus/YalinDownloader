@@ -57,6 +57,9 @@ void DownloadLibrary::CurlWrapper::setProgress(bool option){
     else
         curl_easy_setopt(this->curl_handle.get(), CURLOPT_NOPROGRESS, 1L);
 }
+void DownloadLibrary::CurlWrapper::setShareHandle(CURLSH * share_handle){
+    curl_easy_setopt(this->getRawCurl(), CURLOPT_SHARE, share_handle);
+}
 void DownloadLibrary::CurlWrapper::setUsrAgent(std::string usrAgent){
     curl_easy_setopt(this->curl_handle.get(), CURLOPT_USERAGENT, usrAgent.c_str());
 }

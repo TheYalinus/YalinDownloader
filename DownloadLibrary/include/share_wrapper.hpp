@@ -8,6 +8,8 @@ namespace DownloadLibrary{
     class ShareWrapper{
         public:
             ShareWrapper();
+            void setDNSShare(bool option = true);
+            CURLSH * getSharePtr();
         private:
             uniqueShareHandleType shareHandle;
     };

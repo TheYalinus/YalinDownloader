@@ -20,6 +20,7 @@ namespace DownloadLibrary {
             void setFollowRedirects(bool=true);
             void setProgress(bool=true);
             void setUsrAgent(std::string);
+            void setShareHandle(CURLSH *);
             void resetAttributes();
             CURL * getRawCurl();
             std::string getEffectiveUrl();
