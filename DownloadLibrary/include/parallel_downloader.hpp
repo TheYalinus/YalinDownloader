@@ -6,7 +6,7 @@ namespace DownloadLibrary {
     class ParallelDownloader{
         public:
             ParallelDownloader(ReqsType reqs);
-            long total_download();
+            unsigned long total_download();
             ThreadsType get_threads();
             void join_threads();
         private:

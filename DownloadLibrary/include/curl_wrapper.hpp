@@ -2,6 +2,8 @@
 #define CURL_WRAPPER_HPP
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <curl/header.h>
+#include <curl/system.h>
 #include <memory>
 #include "download_library.hpp"
 //file wrapper that uses the same at curl_request, it should be moved here
@@ -20,6 +22,9 @@ namespace DownloadLibrary {
             void setUsrAgent(std::string);
             void resetAttributes();
             CURL * getRawCurl();
+            std::string getEffectiveUrl();
+            curl_off_t getTotalSize();
+            struct curl_header getHeader(std::string value);
             std::pair <CURLcode,long> executeCurl();
         private:
             uniqueCurlHandleType curl_handle;

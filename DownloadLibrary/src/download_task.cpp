@@ -22,7 +22,7 @@
 #include <string>
 #include <thread>
 #include <vector>
-DownloadLibrary::DownloadTask::DownloadTask(std::string task_location, std::string user_agent, std::string dns, DownloadLibrary::file_properties final_props):task_dir(task_location),user_agent(user_agent),dns(dns){
+DownloadLibrary::DownloadTask::DownloadTask(std::string task_location,  std::string user_agent, std::string dns, std::string url ,DownloadLibrary::file_properties final_props):task_dir(task_location),user_agent(user_agent),dns(dns),url(url){
 
 }
 std::string DownloadLibrary::DownloadTask::gen_part_name(int i){
@@ -42,7 +42,7 @@ void DownloadLibrary::DownloadTaskMultiple::create_json_config(){
     this->cfg_data["url"]=this->url;
     this->cfg_data["total_size"]=this->total_bytes;
 }
-DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(std::string task_location,sharedPoolType connectionPool ,std::string user_agent, std::string dns, bool factory_flag):user_agent(user_agent),connectionPool(connectionPool),DownloadLibrary::DownloadTask(task_location, user_agent,dns){
+DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(std::string task_location,sharedPoolType connectionPool ,std::string user_agent, std::string dns, bool factory_flag):connectionPool(connectionPool),DownloadLibrary::DownloadTask(task_location, user_agent,dns){
     this->task_dir = std::filesystem::path( task_location );
     this->cfg_path= task_dir / "download.json";
     if(!factory_flag){
@@ -97,8 +97,8 @@ DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(std::string task_loc
 
 
 }
-DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(DownloadLibrary::HEADER_FLAG header ,sharedPoolType connectionPool,DownloadLibrary::factory_data fdata , std::string url,std::string task_location, int part_count, std::string user_agent, std::string dns,  bool follow_redirects ,struct file_properties final_props): DownloadLibrary::DownloadTask(task_location,user_agent,dns,final_props),
-url(url),part_count(part_count), user_agent(user_agent),parts(part_count),follow_redirects(follow_redirects),header(header),connectionPool(connectionPool){
+DownloadLibrary::DownloadTaskMultiple::DownloadTaskMultiple(DownloadLibrary::HEADER_FLAG header ,sharedPoolType connectionPool,DownloadLibrary::factory_data fdata , std::string url,std::string task_location, int part_count, std::string user_agent, std::string dns,  bool follow_redirects ,struct file_properties final_props): DownloadLibrary::DownloadTask(task_location,user_agent,dns,url,final_props),
+part_count(part_count),parts(part_count),follow_redirects(follow_redirects),header(header),connectionPool(connectionPool){
     std::cout<<"Debug2"<<std::endl;
     if(!std::filesystem::exists(task_location))
         throw std::runtime_error("Task directory does not exists");
@@ -195,9 +195,15 @@ struct DownloadLibrary::inf_data DownloadLibrary::DownloadTask::get_inf(){
 std::vector<DownloadLibrary::part_data> DownloadLibrary::DownloadTaskMultiple::get_parts(){
     return this->parts;
 }
-void DownloadLibrary::DownloadTaskMultiple::assemble(){
-
-    std::ofstream final_file (this->task_dir / this->final_props.file_name);
+void DownloadLibrary::DownloadTaskMultiple::assemble(std::string into){
+    std::filesystem::path dir;
+    if (into.empty()) {
+        dir= this->task_dir;
+    }
+    else{
+        dir = into;
+    }
+    std::ofstream final_file (dir / this->final_props.file_name);
     for (auto n : this->cfg_data["parts"])
     {
             std::string name =n["name"];
@@ -235,6 +241,10 @@ DownloadLibrary::ReqsType DownloadLibrary::DownloadTaskMultiple::get_requests(){
  std::filesystem::path DownloadLibrary::DownloadTask::getTaskPath(){
      return this->task_dir;
  }
+ unsigned long DownloadLibrary::DownloadTask::getTotalSize(){
+     return this->total_bytes;
+ }
+
 DownloadLibrary::DownloadTaskMultiple::~DownloadTaskMultiple(){
 
 }

@@ -11,7 +11,7 @@
 DownloadLibrary::ParallelDownloader::ParallelDownloader(DownloadLibrary::ReqsType reqs):
 reqs(reqs),threads(std::vector<std::shared_ptr<std::thread>>()),progress_handlers(std::vector<std::atomic<long> *>()){
     for(auto n: reqs){
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         this->threads.push_back(std::make_shared<std::thread>(std::thread([n](){n->curlPerform();})));
         this->progress_handlers.push_back(n->pGetDownloaded());
 
@@ -21,7 +21,7 @@ reqs(reqs),threads(std::vector<std::shared_ptr<std::thread>>()),progress_handler
 DownloadLibrary::ThreadsType DownloadLibrary::ParallelDownloader::get_threads(){
     return this->threads;
 }
-long DownloadLibrary::ParallelDownloader::total_download(){
+unsigned long DownloadLibrary::ParallelDownloader::total_download(){
     long total=0;
     for(std::vector<std::atomic<long> *>::iterator itr =this->progress_handlers.begin() ;itr  != this->progress_handlers.end() ; itr++ ){
         total +=  **itr;

@@ -20,11 +20,12 @@ namespace DownloadLibrary {
             ConnectionPool(int i);
             CurlWrapperPairType getConnection();
             void giveConnection(int);
+            DownloadLibrary::factory_data initalizeConnections(std::string url, std::string user_agent = "", std::string dns ="", bool follow_redirects= true);
         private:
             std::mutex cv_m;
             std::condition_variable cv;
             CurlWrapperMapType curlConnections;
-
+            static size_t dumm_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
     };
     using sharedPoolType = std::shared_ptr<ConnectionPool>;
 };

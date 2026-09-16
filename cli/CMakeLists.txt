@@ -11,4 +11,5 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/p-ranav/argparse.git
 )
 FetchContent_MakeAvailable( argparse)
-target_link_libraries(ydm PRIVATE argparse)
+find_package(nlohmann_json 3.12.0 REQUIRED)
+target_link_libraries(ydm PRIVATE argparse DownloadLibrary nlohmann_json::nlohmann_json)

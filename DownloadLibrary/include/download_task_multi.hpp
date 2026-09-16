@@ -9,13 +9,8 @@ namespace DownloadLibrary {
             sharedPoolType connectionPool;
             HEADER_FLAG header;
             int part_count;
-            long total_bytes;
-            long total_downloaded_bytes;
-            std::filesystem::path task_dir;
             std::filesystem::path cfg_path;
             std::vector<part_data> parts;
-            std::string url;
-            std::string user_agent;
             json cfg_data;
             bool follow_redirects;
             std::string cnttype;
@@ -26,7 +21,7 @@ namespace DownloadLibrary {
             void create_json_config(json & n);
             void create_json_config();
             std::vector<part_data> get_parts();
-            void assemble() override;
+            void assemble(std::string into="") override;
             void clean() override;
             ReqsType get_requests() override;
     };

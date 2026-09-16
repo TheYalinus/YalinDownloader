@@ -29,6 +29,7 @@ Url(url), saveLoc(save_loc), isHdrOnly(header_only),prgData{0,0},dataStream(std:
 
 
 }
+//todo:?maybe a mutex lock mechanic for starting connections not at same time, preventing 429
 CURLcode DownloadLibrary::CurlRequest::curlPerform(){
 
     auto [i, curlw]= this->connectionPool->getConnection();
@@ -46,6 +47,7 @@ CURLcode DownloadLibrary::CurlRequest::curlPerform(){
     curlw->setRange(this->range);
     if (!this->dns.empty())
         curlw->setDns(this->dns);
+
     curlw->setUrl(this->Url);
     std::cout<<"curlPerform"<<std::endl;
     CURLcode cc;
@@ -75,6 +77,7 @@ CURLcode DownloadLibrary::CurlRequest::curlPerform(){
         cc= exec.first;
         http_code= exec.second;
     }
+    //todo : add a fallback for other errors
     curlw.reset();
     connectionPool->giveConnection(i);
     return cc;

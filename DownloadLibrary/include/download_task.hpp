@@ -2,6 +2,8 @@
 #define DOWNLOAD_TASK_HPP
 #include "download_library.hpp"
 #include "curl_request.hpp"
+#include <filesystem>
+//todo convert variables to unsigned
 namespace DownloadLibrary {
     class DownloadTask{
         protected:
@@ -9,7 +11,7 @@ namespace DownloadLibrary {
             std::string dns;
             struct inf_data get_inf();
             static std::string gen_random_file_name();
-            long total_bytes;
+            unsigned long total_bytes;
             long total_downloaded_bytes;
             std::filesystem::path task_dir;
             std::string url;
@@ -19,9 +21,11 @@ namespace DownloadLibrary {
             std::string getFinalFileName();
             std::filesystem::path getTaskPath();
             bool follow_redirects;
-            DownloadTask(std::string task_location, std::string user_agent="", std::string dns="", file_properties final_props = {"",""});
+            unsigned long getTotalSize();
+            DownloadTask(std::string task_location ,  std::string user_agent="", std::string dns="", std::string url="", file_properties final_props = {"",""});
+            void copyFinalFileInto(std::filesystem::path);
             virtual std::vector<std::shared_ptr<DownloadLibrary::CurlRequest>> get_requests()=0;
-            virtual void assemble()=0;
+            virtual void assemble(std::string into="")=0;
             virtual void clean()=0;
             virtual ~DownloadTask();
     };

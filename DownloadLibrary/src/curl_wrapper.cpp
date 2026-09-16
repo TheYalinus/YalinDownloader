@@ -2,10 +2,11 @@
 #include "download_library.hpp"
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <curl/system.h>
 
 DownloadLibrary::CurlWrapper::CurlWrapper():
 curl_handle(curl_easy_init(), &curl_easy_cleanup){
-
+    curl_easy_setopt(this->curl_handle.get(),CURLOPT_VERBOSE,1L);
 }
 
 void DownloadLibrary::CurlWrapper::setUrl(std::string url){
@@ -58,4 +59,24 @@ void DownloadLibrary::CurlWrapper::setProgress(bool option){
 }
 void DownloadLibrary::CurlWrapper::setUsrAgent(std::string usrAgent){
     curl_easy_setopt(this->curl_handle.get(), CURLOPT_USERAGENT, usrAgent.c_str());
+}
+std::string DownloadLibrary::CurlWrapper::getEffectiveUrl(){
+    char * effective_url_buff_c;
+    curl_easy_getinfo(this->curl_handle.get(), CURLINFO_EFFECTIVE_URL, &effective_url_buff_c);
+    if(effective_url_buff_c != NULL){
+        return std::string{effective_url_buff_c};
+    }
+    else {
+        return std::string{"unknown"};
+    }
+}
+curl_off_t DownloadLibrary::CurlWrapper::getTotalSize(){
+    curl_off_t total_size_buffer=0;
+    curl_easy_getinfo(this->curl_handle.get(), CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &total_size_buffer);
+    return total_size_buffer;
+}
+struct curl_header DownloadLibrary::CurlWrapper::getHeader(std::string value){
+    struct curl_header *type;
+    curl_easy_header(this->curl_handle.get(), value.c_str(), 0, CURLH_HEADER, -1, &type);
+    return *type;
 }

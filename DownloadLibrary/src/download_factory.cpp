@@ -9,17 +9,12 @@
 //check are things like download location etc. are okay inside factory
 //add thread pool system to downloader
 DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std::string url, std::string task_location, int part_count, int connection_number ,std::string user_agent,  bool follow_redirects,file_properties props , std::string dns){
+    /*
         factory_data result;
         //implement the new curlwrapper usage here
         CURL * curl = curl_easy_init();
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        if(!dns.empty())
-            curl_easy_setopt(curl, CURLOPT_DNS_SERVERS, dns.c_str());
-        if(!user_agent.empty())
-            curl_easy_setopt(curl, CURLOPT_USERAGENT, user_agent.c_str());
-        if(follow_redirects)
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        //set thread count and part count automatically
+        //todo set thread count and part count automatically
         curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
         CURLcode  result_code = curl_easy_perform(curl);
         if(result_code ==CURLE_OK){
@@ -39,6 +34,11 @@ DownloadLibrary::DownloadTask* DownloadLibrary::DownloadFactory::createTask(std:
             throw  std::runtime_error("Problem while fetching data"+std::to_string(result_code));
 
         }
+        */
+        auto connectionPool = std::make_shared<ConnectionPool>(connection_number);
+        auto data = connectionPool->initalizeConnections(url, user_agent ,dns , follow_redirects);
+        return new DownloadTaskMultiple(HEADER_REJECT,connectionPool ,data, url, task_location, part_count, user_agent, dns, follow_redirects, props );
+
     }
     /*int DownloadLibrary::DownloadFactory::dumm_progress_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow){
         if(dlnow>=1){
