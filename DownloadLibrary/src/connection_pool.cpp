@@ -1,6 +1,7 @@
 #include "connection_pool.hpp"
 #include "curl_wrapper.hpp"
 #include "download_library.hpp"
+#include <chrono>
 #include <cstddef>
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -9,6 +10,7 @@
 #include <memory>
 #include <mutex>
 #include <stdexcept>
+#include <thread>
 #include <tuple>
 
 DownloadLibrary::ConnectionPool::ConnectionPool(int n)
@@ -53,6 +55,7 @@ void DownloadLibrary::ConnectionPool::giveConnection(int i){
 }
 DownloadLibrary::factory_data DownloadLibrary::ConnectionPool::initalizeConnections(std::string url, std::string user_agent , std::string dns, bool follow_redirects){
     factory_data result;
+    bool headerAccept =true;
     //tod : use a share interface and write a wrapper for it
     for(auto &n : this->curlConnections){
         n.second->setUrl(url);
@@ -66,18 +69,51 @@ DownloadLibrary::factory_data DownloadLibrary::ConnectionPool::initalizeConnecti
         //curl_easy_setopt(n.second->getRawCurl(), CURLOPT_WRITEFUNCTION, DownloadLibrary::ConnectionPool::dumm_write_callback);
         n.second->setHeaderOnly();
         std::cout<<"debug"<<std::endl;
-        if(auto exec= n.second->executeCurl(); exec.second == 206) // important !!! fallback for servers who rejects head requests
-            throw std::runtime_error("Error when initalizing connections"); //todo: write a fallback for this
-    }
-    result.total_size= this->curlConnections.at(0)->getTotalSize();
-    result.efct_url = this->curlConnections.at(0)->getEffectiveUrl();
-    result.cnt_type = this->curlConnections.at(0)->getHeader("Content-Type").value;
-    auto effective_url_buff= this->curlConnections.at(0)->getEffectiveUrl();
-    result.props={
-        effective_url_buff.substr(effective_url_buff.find_last_of(".")+1),
-        effective_url_buff.substr(effective_url_buff.find_last_of("/")+1,(effective_url_buff.find('?')-(effective_url_buff.find_last_of("/")))-1)
+        if(headerAccept){
+        if(auto exec= n.second->executeCurl(); exec.second != 200) { // important !!! fallback for servers who rejects head requests
+            if(exec.first == 56){
+                headerAccept=false;
+            }
+            else {
+                std::cout<<exec.second <<std::endl;
+                throw std::runtime_error("Error when initalizing connections");
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+            // //todo: write a fallback for this
 
+    }
+    auto setData = [&result, this](){
+        result.total_size= this->curlConnections.at(0)->getTotalSize();
+        result.efct_url = this->curlConnections.at(0)->getEffectiveUrl();
+        result.cnt_type = this->curlConnections.at(0)->getHeader("Content-Type").value;
+        auto effective_url_buff= this->curlConnections.at(0)->getEffectiveUrl();
+        result.props={
+            effective_url_buff.substr(effective_url_buff.find_last_of(".")+1),
+            effective_url_buff.substr(effective_url_buff.find_last_of("/")+1,(effective_url_buff.find('?')-(effective_url_buff.find_last_of("/")))-1)
+
+        };
     };
+    if(!headerAccept){
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        curl_easy_setopt(this->curlConnections.at(0)->getRawCurl(), CURLOPT_WRITEFUNCTION, DownloadLibrary::ConnectionPool::dumm_write_callback);
+        this->curlConnections.at(0)->resetAttributes();
+        std::cout<<this->curlConnections.at(0)->executeCurl().first <<std::endl;
+        setData();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        curl_easy_setopt(this->curlConnections.at(0)->getRawCurl(), CURLOPT_WRITEFUNCTION, NULL);
+        for(auto &n : this->curlConnections){
+            n.second->resetAttributes();
+            n.second->setRange({"0","1"});
+            if(n.second->executeCurl().first !=CURLE_OK)
+                throw std::runtime_error("Header reject -> error");
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+    else{
+        setData();
+    }
 
     return result;
 }
